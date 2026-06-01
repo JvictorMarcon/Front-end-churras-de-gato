@@ -77,7 +77,6 @@
             font-weight: 600;
             margin-left: 8px;
             white-space: nowrap;
-            display: inline-block;
         }
         
         .kilo-badge {
@@ -89,14 +88,12 @@
             font-weight: 600;
             margin-left: 8px;
             white-space: nowrap;
-            display: inline-block;
         }
         
         /* Search Highlight */
         .search-highlight {
             background-color: rgba(211, 107, 26, 0.3);
             font-weight: bold;
-            border-radius: 2px;
         }
         
         /* Custom Scrollbar */
@@ -123,14 +120,16 @@
             overflow: hidden;
         }
         
-        /* Sidebar transition */
-        .sidebar-transition {
-            transition: transform 0.3s ease-in-out;
-        }
-        
-        /* Main content transition */
-        .main-content-transition {
-            transition: margin-left 0.3s ease-in-out;
+        /* Table Responsive Styles */
+        @media (max-width: 768px) {
+            .table-container {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            .table-card {
+                min-width: 600px;
+            }
         }
         
         /* Chart Responsive */
@@ -139,43 +138,38 @@
             width: 100% !important;
         }
         
-        /* Table Responsive */
-        @media (max-width: 768px) {
-            .table-container {
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
+        /* Responsive Text */
+        @media (max-width: 640px) {
+            .responsive-text {
+                font-size: 0.875rem;
             }
         }
         
-        /* Ajustes para telas grandes */
-        @media (min-width: 1024px) {
-            .sidebar-open {
-                margin-left: 16rem;
+        /* Print Styles */
+        @media print {
+            .no-print {
+                display: none;
             }
-        }
-        
-        /* Hide scrollbar for clean look */
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
+            .sidebar {
+                display: none;
+            }
+            .main-content {
+                margin-left: 0;
+            }
         }
     </style>
 </head>
 <body class="bg-[#0A0A0A]">
-    <!-- Mobile Menu Button - Reposicionado para não sobrepor -->
-    <button id="mobileMenuBtn" class="lg:hidden fixed top-4 left-4 z-50 bg-[#D36B1A] text-white p-3 rounded-lg shadow-lg hover:bg-[#7F3E11] transition-all">
+    <!-- Mobile Menu Button -->
+    <button id="mobileMenuBtn" class="lg:hidden fixed top-4 left-4 z-50 bg-[#D36B1A] text-white p-3 rounded-lg shadow-lg no-print">
         <i class="fas fa-bars text-xl"></i>
     </button>
     
     <!-- Overlay para mobile -->
-    <div id="mobileOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden lg:hidden" onclick="closeMobileMenu()"></div>
+    <div id="mobileOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden lg:hidden no-print" onclick="closeMobileMenu()"></div>
     
     <!-- Sidebar -->
-    <div id="sidebar" class="fixed top-0 left-0 z-50 w-64 h-full bg-[#161616] border-r border-[#7F3E11] transform -translate-x-full lg:translate-x-0 lg:relative lg:z-auto sidebar-transition overflow-y-auto">
+    <div id="sidebar" class="fixed lg:relative z-50 w-64 bg-[#161616] border-r border-[#7F3E11] h-full transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out overflow-y-auto no-print">
         <div class="p-6">
             <div class="flex justify-between items-center">
                 <div>
@@ -185,7 +179,7 @@
                     </h1>
                     <p class="text-[#C2C2C2] text-sm mt-2">Sistema de Gestão</p>
                 </div>
-                <button id="closeMobileMenu" class="lg:hidden text-[#C2C2C2] hover:text-[#FFFFFF] transition-all">
+                <button id="closeMobileMenu" class="lg:hidden text-[#C2C2C2] hover:text-[#FFFFFF]">
                     <i class="fas fa-times text-2xl"></i>
                 </button>
             </div>
@@ -194,7 +188,6 @@
         <nav class="mt-8">
             <a href="#" onclick="showDashboard(); return false;" class="nav-item active flex items-center px-6 py-3 text-[#C2C2C2] hover:bg-[#7F3E11] hover:text-[#FFFFFF] transition-all">
                 <i class="fas fa-chart-line w-5 mr-3"></i>
-                <span>Dashboard</span>
             </a>
             <a href="#" onclick="showEstoque(); return false;" class="nav-item flex items-center px-6 py-3 text-[#C2C2C2] hover:bg-[#7F3E11] hover:text-[#FFFFFF] transition-all">
                 <i class="fas fa-boxes w-5 mr-3"></i>
@@ -206,14 +199,14 @@
     </div>
     
     <!-- Main Content -->
-    <div id="mainContent" class="min-h-screen lg:ml-64 main-content-transition">
-        <!-- Header - Adicionando padding-top no mobile para não ficar atrás do botão -->
-        <div class="bg-[#161616] border-b border-[#7F3E11] px-4 sm:px-8 py-4 sticky top-0 z-30">
+    <div class="lg:ml-64 min-h-screen">
+        <!-- Header -->
+        <div class="bg-[#161616] border-b border-[#7F3E11] px-4 sm:px-8 py-4 sticky top-0 z-30 no-print">
             <div class="flex justify-between items-center">
-                <h2 class="text-lg sm:text-xl font-semibold text-[#FFFFFF]" id="pageTitle">
-                </h2>
+                <h2 class="text-lg sm:text-xl font-semibold text-[#FFFFFF]" id="pageTitle">Dashboard</h2>
                 <div class="text-[#C2C2C2] flex items-center">
                     <i class="fas fa-user-circle text-2xl"></i>
+                    <span class="ml-2 hidden sm:inline">Administrador</span>
                 </div>
             </div>
         </div>
@@ -224,7 +217,7 @@
         </div>
     </div>
     
-    <!-- Toast Container - Reposicionado para não ser coberto -->
+    <!-- Toast Container -->
     <div id="toastContainer" class="fixed top-20 right-4 sm:right-5 z-50 space-y-3"></div>
     
     <!-- Modal Container -->
