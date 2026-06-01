@@ -19,15 +19,36 @@ document.addEventListener('DOMContentLoaded', () => {
     loadRetiradas();
     setupMobileMenu();
     setupResponsiveCharts();
+    adjustLayoutForScreen();
     
     // Adicionar listener para redimensionamento
     window.addEventListener('resize', () => {
         setupResponsiveCharts();
+        adjustLayoutForScreen();
         if (currentView === 'dashboard') {
             updateDashboard();
+        } else if (currentView === 'estoque') {
+            renderEstoque();
         }
     });
 });
+
+// Adjust layout based on screen size
+function adjustLayoutForScreen() {
+    const mainContent = document.getElementById('mainContent');
+    const sidebar = document.getElementById('sidebar');
+    
+    if (window.innerWidth >= 1024) {
+        // Em telas grandes, sidebar sempre visível
+        if (sidebar) sidebar.classList.remove('-translate-x-full');
+        if (mainContent) mainContent.classList.remove('ml-0');
+    } else {
+        // Em mobile, sidebar escondida por padrão
+        if (sidebar && !sidebar.classList.contains('-translate-x-full')) {
+            sidebar.classList.add('-translate-x-full');
+        }
+    }
+}
 
 // Setup Mobile Menu
 function setupMobileMenu() {
@@ -35,49 +56,51 @@ function setupMobileMenu() {
     const closeMenuBtn = document.getElementById('closeMobileMenu');
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('mobileOverlay');
+    const mainContent = document.getElementById('mainContent');
     
     if (mobileMenuBtn) {
-        mobileMenuBtn.addEventListener('click', () => {
-            sidebar.classList.remove('-translate-x-full');
-            overlay.classList.remove('hidden');
-            document.body.classList.add('mobile-menu-open');
+        mobileMenuBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (sidebar) {
+                sidebar.classList.remove('-translate-x-full');
+                if (overlay) overlay.classList.remove('hidden');
+                document.body.classList.add('mobile-menu-open');
+            }
         });
     }
     
     const closeMenu = () => {
-        sidebar.classList.add('-translate-x-full');
-        overlay.classList.add('hidden');
+        if (sidebar && window.innerWidth < 1024) {
+            sidebar.classList.add('-translate-x-full');
+        }
+        if (overlay) overlay.classList.add('hidden');
         document.body.classList.remove('mobile-menu-open');
     };
     
     if (closeMenuBtn) closeMenuBtn.addEventListener('click', closeMenu);
     if (overlay) overlay.addEventListener('click', closeMenu);
-}
-
-// Fechar menu mobile ao clicar em link
-function closeMobileMenuOnClick() {
-    if (window.innerWidth < 1024) {
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('mobileOverlay');
-        if (sidebar) sidebar.classList.add('-translate-x-full');
-        if (overlay) overlay.classList.add('hidden');
-        document.body.classList.remove('mobile-menu-open');
-    }
+    
+    // Fechar menu ao clicar em um link (mobile)
+    const navLinks = document.querySelectorAll('.nav-item');
+    navLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            if (window.innerWidth < 1024) {
+                closeMenu();
+            }
+        });
+    });
 }
 
 // Setup Responsive Charts
 function setupResponsiveCharts() {
-    const chartsContainer = document.getElementById('contentArea');
-    if (chartsContainer) {
-        const chartContainers = document.querySelectorAll('.chart-container');
-        chartContainers.forEach(container => {
-            if (window.innerWidth < 768) {
-                container.classList.add('w-full', 'overflow-x-auto');
-            } else {
-                container.classList.remove('w-full', 'overflow-x-auto');
-            }
-        });
-    }
+    const chartContainers = document.querySelectorAll('.chart-container');
+    chartContainers.forEach(container => {
+        if (window.innerWidth < 768) {
+            container.classList.add('w-full', 'overflow-x-auto');
+        } else {
+            container.classList.remove('w-full', 'overflow-x-auto');
+        }
+    });
 }
 
 // Load Retiradas from localStorage
@@ -92,8 +115,7 @@ function loadRetiradas() {
 
 // Save Retirada
 function saveRetirada(retirada) {
-    retiradas.unshift(retirada); // Adiciona no início
-    // Manter apenas últimos 100 registros
+    retiradas.unshift(retirada);
     if (retiradas.length > 100) {
         retiradas = retiradas.slice(0, 100);
     }
@@ -123,7 +145,7 @@ function showToast(message, type = 'success') {
     toast.innerHTML = `
         <i class="fas ${icons[type]} text-lg sm:text-xl"></i>
         <span class="flex-1">${message}</span>
-        <button onclick="this.parentElement.remove()" class="hover:opacity-80">
+        <button onclick="this.parentElement.remove()" class="hover:opacity-80 transition-all">
             <i class="fas fa-times"></i>
         </button>
     `;
@@ -225,31 +247,32 @@ function highlightText(text, searchTerm) {
 // Show Dashboard
 async function showDashboard() {
     currentView = 'dashboard';
-    document.getElementById('pageTitle').innerHTML = '<i class="fas fa-chart-line mr-2"></i>Dashboard';
+    const pageTitle = document.getElementById('pageTitle');
+    if (pageTitle) {
+        pageTitle.innerHTML = '<i class="fas fa-chart-line mr-2"></i>Dashboard';
+    }
     
     // Update active nav
     document.querySelectorAll('.nav-item').forEach(item => {
         item.classList.remove('bg-[#7F3E11]', 'text-[#FFFFFF]');
         item.classList.add('text-[#C2C2C2]');
     });
-    document.querySelectorAll('.nav-item')[0].classList.add('bg-[#7F3E11]', 'text-[#FFFFFF]');
+    if (document.querySelectorAll('.nav-item')[0]) {
+        document.querySelectorAll('.nav-item')[0].classList.add('bg-[#7F3E11]', 'text-[#FFFFFF]');
+    }
     
     await loadProducts();
-    closeMobileMenuOnClick();
 }
 
 // Update Dashboard
 function updateDashboard() {
     const stats = getProductStats();
-    
-    // Calcular total de retiradas
-    const totalRetiradas = retiradas.length;
     const ultimasRetiradas = retiradas.slice(0, 5);
     
     const content = `
         <!-- Stats Cards -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
-            <div class="bg-[#161616] rounded-lg p-4 sm:p-6 border border-[#7F3E11]">
+            <div class="bg-[#161616] rounded-lg p-4 sm:p-6 border border-[#7F3E11] hover:border-[#D36B1A] transition-all">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-[#C2C2C2] text-xs sm:text-sm">Total de Produtos</p>
@@ -259,7 +282,7 @@ function updateDashboard() {
                 </div>
             </div>
             
-            <div class="bg-[#161616] rounded-lg p-4 sm:p-6 border border-[#7F3E11]">
+            <div class="bg-[#161616] rounded-lg p-4 sm:p-6 border border-[#7F3E11] hover:border-[#D36B1A] transition-all">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-[#C2C2C2] text-xs sm:text-sm">Produtos Ativos</p>
@@ -269,7 +292,7 @@ function updateDashboard() {
                 </div>
             </div>
             
-            <div class="bg-[#161616] rounded-lg p-4 sm:p-6 border border-[#7F3E11]">
+            <div class="bg-[#161616] rounded-lg p-4 sm:p-6 border border-[#7F3E11] hover:border-[#D36B1A] transition-all">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-[#C2C2C2] text-xs sm:text-sm">Produtos Vencidos</p>
@@ -279,18 +302,18 @@ function updateDashboard() {
                 </div>
             </div>
             
-            <div class="bg-[#161616] rounded-lg p-4 sm:p-6 border border-[#7F3E11]">
+            <div class="bg-[#161616] rounded-lg p-4 sm:p-6 border border-[#7F3E11] hover:border-[#D36B1A] transition-all">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-[#C2C2C2] text-xs sm:text-sm">Total de Retiradas</p>
-                        <p class="text-2xl sm:text-3xl font-bold text-[#D36B1A] mt-2">${totalRetiradas}</p>
+                        <p class="text-2xl sm:text-3xl font-bold text-[#D36B1A] mt-2">${retiradas.length}</p>
                     </div>
                     <i class="fas fa-clipboard-list text-3xl sm:text-4xl text-[#D36B1A]"></i>
                 </div>
             </div>
         </div>
         
-        <!-- Charts -->
+        <!-- Charts - Layout lado a lado em telas grandes -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 mb-6 sm:mb-8">
             <div class="bg-[#161616] rounded-lg p-4 sm:p-6 border border-[#7F3E11]">
                 <h3 class="text-base sm:text-lg font-semibold text-[#FFFFFF] mb-4">
@@ -313,6 +336,7 @@ function updateDashboard() {
             </div>
         </div>
         
+        <!-- Segunda linha de charts - lado a lado -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
             <div class="bg-[#161616] rounded-lg p-4 sm:p-6 border border-[#7F3E11]">
                 <h3 class="text-base sm:text-lg font-semibold text-[#FFFFFF] mb-4">
@@ -329,16 +353,20 @@ function updateDashboard() {
                     <i class="fas fa-history mr-2 text-[#D36B1A]"></i>
                     Últimas Retiradas
                 </h3>
-                <div class="space-y-3 max-h-80 overflow-y-auto">
+                <div class="space-y-3 max-h-80 overflow-y-auto custom-scrollbar">
                     ${ultimasRetiradas.length === 0 ? `
                         <p class="text-[#C2C2C2] text-center py-8">Nenhuma retirada registrada ainda</p>
                     ` : ultimasRetiradas.map(ret => `
-                        <div class="bg-[#0A0A0A] rounded-lg p-3 border border-[#7F3E11]">
+                        <div class="bg-[#0A0A0A] rounded-lg p-3 border border-[#7F3E11] hover:border-[#D36B1A] transition-all">
                             <div class="flex justify-between items-start">
-                                <div>
+                                <div class="flex-1">
                                     <p class="text-[#FFFFFF] font-semibold">${ret.produto}</p>
-                                    <p class="text-[#C2C2C2] text-sm">Responsável: ${ret.responsavel}</p>
-                                    <p class="text-[#C2C2C2] text-xs">${new Date(ret.data).toLocaleString('pt-BR')}</p>
+                                    <p class="text-[#C2C2C2] text-sm mt-1">
+                                        <i class="fas fa-user mr-1"></i> ${ret.responsavel}
+                                    </p>
+                                    <p class="text-[#C2C2C2] text-xs mt-1">
+                                        <i class="fas fa-calendar mr-1"></i> ${new Date(ret.data).toLocaleString('pt-BR')}
+                                    </p>
                                 </div>
                                 <div class="text-right">
                                     <p class="text-[#D36B1A] font-bold">-${ret.quantidade} ${ret.unidade}</p>
@@ -363,7 +391,9 @@ function updateDashboard() {
 
 // Create Quantity Chart
 function createQuantityChart() {
-    const ctx = document.getElementById('quantityChart').getContext('2d');
+    const ctx = document.getElementById('quantityChart');
+    if (!ctx) return;
+    
     const topProducts = [...products]
         .sort((a, b) => b.quantidade - a.quantidade)
         .slice(0, 5);
@@ -415,7 +445,9 @@ function createQuantityChart() {
 
 // Create Status Chart
 function createStatusChart() {
-    const ctx = document.getElementById('statusChart').getContext('2d');
+    const ctx = document.getElementById('statusChart');
+    if (!ctx) return;
+    
     const stats = getProductStats();
     
     if (charts.status) charts.status.destroy();
@@ -445,7 +477,9 @@ function createStatusChart() {
 
 // Create Category Chart
 function createCategoryChart() {
-    const ctx = document.getElementById('categoryChart').getContext('2d');
+    const ctx = document.getElementById('categoryChart');
+    if (!ctx) return;
+    
     const categories = {};
     
     products.forEach(product => {
@@ -503,34 +537,42 @@ function createCategoryChart() {
 // Show Estoque Page
 async function showEstoque() {
     currentView = 'estoque';
-    document.getElementById('pageTitle').innerHTML = '<i class="fas fa-boxes mr-2"></i>Gerenciar Estoque';
+    const pageTitle = document.getElementById('pageTitle');
+    if (pageTitle) {
+        pageTitle.innerHTML = '<i class="fas fa-boxes mr-2"></i>Gerenciar Estoque';
+    }
     
     // Update active nav
     document.querySelectorAll('.nav-item').forEach(item => {
         item.classList.remove('bg-[#7F3E11]', 'text-[#FFFFFF]');
         item.classList.add('text-[#C2C2C2]');
     });
-    document.querySelectorAll('.nav-item')[1].classList.add('bg-[#7F3E11]', 'text-[#FFFFFF]');
+    if (document.querySelectorAll('.nav-item')[1]) {
+        document.querySelectorAll('.nav-item')[1].classList.add('bg-[#7F3E11]', 'text-[#FFFFFF]');
+    }
     
     await loadProducts();
-    closeMobileMenuOnClick();
 }
 
 // Show Retiradas Page
 async function showRetiradas() {
     currentView = 'retiradas';
-    document.getElementById('pageTitle').innerHTML = '<i class="fas fa-clipboard-list mr-2"></i>Registro de Retiradas';
+    const pageTitle = document.getElementById('pageTitle');
+    if (pageTitle) {
+        pageTitle.innerHTML = '<i class="fas fa-clipboard-list mr-2"></i>Registro de Retiradas';
+    }
     
     // Update active nav
     document.querySelectorAll('.nav-item').forEach(item => {
         item.classList.remove('bg-[#7F3E11]', 'text-[#FFFFFF]');
         item.classList.add('text-[#C2C2C2]');
     });
-    document.querySelectorAll('.nav-item')[2].classList.add('bg-[#7F3E11]', 'text-[#FFFFFF]');
+    if (document.querySelectorAll('.nav-item')[2]) {
+        document.querySelectorAll('.nav-item')[2].classList.add('bg-[#7F3E11]', 'text-[#FFFFFF]');
+    }
     
     await loadProducts();
     renderRetiradas();
-    closeMobileMenuOnClick();
 }
 
 // Render Retiradas Page
@@ -547,8 +589,8 @@ function renderRetiradas() {
                 <form onsubmit="registrarRetirada(event)">
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-[#C2C2C2] mb-2">Produto *</label>
-                            <select id="produtoRetirada" required class="w-full px-4 py-2 bg-[#0A0A0A] border border-[#7F3E11] rounded-lg text-[#FFFFFF] focus:outline-none focus:border-[#D36B1A]">
+                            <label class="block text-[#C2C2C2] mb-2 text-sm sm:text-base">Produto *</label>
+                            <select id="produtoRetirada" required class="w-full px-4 py-2 bg-[#0A0A0A] border border-[#7F3E11] rounded-lg text-[#FFFFFF] focus:outline-none focus:border-[#D36B1A] text-sm sm:text-base">
                                 <option value="">Selecione um produto...</option>
                                 ${products.filter(p => !isExpired(p.validade)).map(product => `
                                     <option value="${product.id}" data-quantidade="${product.quantidade}" data-categoria="${product.categoria}" data-nome="${product.produto}">
@@ -559,19 +601,19 @@ function renderRetiradas() {
                         </div>
                         
                         <div>
-                            <label class="block text-[#C2C2C2] mb-2">Quantidade a Retirar *</label>
-                            <input type="number" id="quantidadeRetirada" required step="any" class="w-full px-4 py-2 bg-[#0A0A0A] border border-[#7F3E11] rounded-lg text-[#FFFFFF] focus:outline-none focus:border-[#D36B1A]">
+                            <label class="block text-[#C2C2C2] mb-2 text-sm sm:text-base">Quantidade a Retirar *</label>
+                            <input type="number" id="quantidadeRetirada" required step="any" class="w-full px-4 py-2 bg-[#0A0A0A] border border-[#7F3E11] rounded-lg text-[#FFFFFF] focus:outline-none focus:border-[#D36B1A] text-sm sm:text-base">
                             <p id="quantidadeDisponivel" class="text-xs text-[#C2C2C2] mt-1"></p>
                         </div>
                         
                         <div>
-                            <label class="block text-[#C2C2C2] mb-2">Responsável pela Retirada *</label>
-                            <input type="text" id="responsavel" required class="w-full px-4 py-2 bg-[#0A0A0A] border border-[#7F3E11] rounded-lg text-[#FFFFFF] focus:outline-none focus:border-[#D36B1A]" placeholder="Nome do responsável">
+                            <label class="block text-[#C2C2C2] mb-2 text-sm sm:text-base">Responsável pela Retirada *</label>
+                            <input type="text" id="responsavel" required class="w-full px-4 py-2 bg-[#0A0A0A] border border-[#7F3E11] rounded-lg text-[#FFFFFF] focus:outline-none focus:border-[#D36B1A] text-sm sm:text-base" placeholder="Nome do responsável">
                         </div>
                         
                         <div>
-                            <label class="block text-[#C2C2C2] mb-2">Observação (Opcional)</label>
-                            <textarea id="observacao" rows="3" class="w-full px-4 py-2 bg-[#0A0A0A] border border-[#7F3E11] rounded-lg text-[#FFFFFF] focus:outline-none focus:border-[#D36B1A]" placeholder="Motivo da retirada, destino, etc..."></textarea>
+                            <label class="block text-[#C2C2C2] mb-2 text-sm sm:text-base">Observação (Opcional)</label>
+                            <textarea id="observacao" rows="3" class="w-full px-4 py-2 bg-[#0A0A0A] border border-[#7F3E11] rounded-lg text-[#FFFFFF] focus:outline-none focus:border-[#D36B1A] text-sm sm:text-base" placeholder="Motivo da retirada, destino, etc..."></textarea>
                         </div>
                     </div>
                     
@@ -591,7 +633,7 @@ function renderRetiradas() {
                     Histórico de Retiradas
                 </h3>
                 
-                <div class="space-y-3 max-h-[500px] overflow-y-auto">
+                <div class="space-y-3 max-h-[500px] overflow-y-auto custom-scrollbar">
                     ${retiradas.length === 0 ? `
                         <p class="text-[#C2C2C2] text-center py-8">Nenhuma retirada registrada ainda</p>
                     ` : retiradas.map(ret => `
@@ -805,12 +847,12 @@ function renderEstoque() {
                         value="${currentSearchTerm}"
                     >
                     ${currentSearchTerm ? `
-                        <button onclick="clearSearch()" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#C2C2C2] hover:text-[#FFFFFF]">
+                        <button onclick="clearSearch()" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#C2C2C2] hover:text-[#FFFFFF] transition-all">
                             <i class="fas fa-times"></i>
                         </button>
                     ` : ''}
                 </div>
-                <div class="text-[#C2C2C2] py-2 px-4 bg-[#0A0A0A] rounded-lg border border-[#7F3E11] text-center sm:text-left">
+                <div class="text-[#C2C2C2] py-2 px-4 bg-[#0A0A0A] rounded-lg border border-[#7F3E11] text-center sm:text-left whitespace-nowrap">
                     <i class="fas fa-filter mr-2"></i>
                     ${searchResultCount} resultado${searchResultCount !== 1 ? 's' : ''}
                 </div>
@@ -852,15 +894,15 @@ function renderEstoque() {
                             
                             return `
                             <tr class="hover:bg-[#0A0A0A] transition-all">
-                                <td class="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-[#FFFFFF]">
+                                <td class="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
                                     <div class="flex items-center flex-wrap gap-1">
-                                        <span class="text-sm sm:text-base">${highlightedProduto}</span>
+                                        <span class="text-sm sm:text-base text-[#FFFFFF]">${highlightedProduto}</span>
                                         <span class="${unitType === 'kg' ? 'kilo-badge' : 'unit-badge'} text-xs">
                                             <i class="fas ${unitType === 'kg' ? 'fa-weight-hanging' : 'fa-box'} mr-1"></i>
                                             ${unitType === 'kg' ? 'KG' : 'UN'}
                                         </span>
                                     </div>
-                                 </td>
+                                  </td>
                                 <td class="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-[#C2C2C2] text-sm ${isMobile ? 'hidden sm:table-cell' : ''}">${highlightedMarca}</td>
                                 <td class="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-[#C2C2C2] text-sm">${highlightedCategoria}</td>
                                 <td class="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-[#FFFFFF] font-semibold text-sm sm:text-base">${formattedQuantity} ${unitLabel}</td>
@@ -870,7 +912,7 @@ function renderEstoque() {
                                         '<span class="expired-badge px-2 py-1 text-xs font-semibold rounded-full bg-[#A62424] text-white whitespace-nowrap"><i class="fas fa-skull mr-1"></i>Vencido</span>' : 
                                         '<span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-500 text-white whitespace-nowrap"><i class="fas fa-check mr-1"></i>Ativo</span>'
                                     }
-                                 </td>
+                                  </td>
                                 <td class="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
                                     <button onclick="showEditarModal(${product.id})" class="text-[#D36B1A] hover:text-[#7F3E11] mr-2 sm:mr-3 transition-all">
                                         <i class="fas fa-edit"></i>
@@ -878,8 +920,8 @@ function renderEstoque() {
                                     <button onclick="deletarProduto(${product.id})" class="text-[#A62424] hover:text-red-700 transition-all">
                                         <i class="fas fa-trash"></i>
                                     </button>
-                                 </td>
-                            </tr>
+                                  </td>
+                             </tr>
                         `}).join('')}
                     </tbody>
                 </table>
@@ -906,7 +948,7 @@ function showCadastroModal() {
                         <i class="fas fa-plus-circle text-[#D36B1A] mr-2"></i>
                         Novo Produto
                     </h2>
-                    <button onclick="closeModal()" class="text-[#C2C2C2] hover:text-[#FFFFFF]">
+                    <button onclick="closeModal()" class="text-[#C2C2C2] hover:text-[#FFFFFF] transition-all">
                         <i class="fas fa-times text-xl"></i>
                     </button>
                 </div>
@@ -1033,6 +1075,8 @@ async function cadastrarProduto(event) {
         await atualizarProduto(existingProduct.id, { quantidade: newQuantidade });
         const unitType = getUnitType(existingProduct.categoria);
         showToast(`Produto "${produto}" atualizado! Nova ${unitType === 'kg' ? 'quantidade em KG' : 'quantidade'}: ${newQuantidade} ${unitType === 'kg' ? 'kg' : 'unidades'}`, 'info');
+        closeModal();
+        await loadProducts();
     } else {
         // Create new product
         const data = { produto, marca, categoria, quantidade, validade };
@@ -1050,8 +1094,6 @@ async function cadastrarProduto(event) {
             showToast(`Produto "${produto}" cadastrado com sucesso! ${quantidade} ${unitType === 'kg' ? 'kg' : 'unidades'}`, 'success');
             closeModal();
             await loadProducts();
-            if (currentView === 'estoque') renderEstoque();
-            else if (currentView === 'dashboard') updateDashboard();
         } catch (error) {
             showToast('Erro ao cadastrar: ' + error.message, 'error');
         }
@@ -1074,7 +1116,7 @@ function showEditarModal(id) {
                         <i class="fas fa-edit text-[#D36B1A] mr-2"></i>
                         Editar Produto
                     </h2>
-                    <button onclick="closeModal()" class="text-[#C2C2C2] hover:text-[#FFFFFF]">
+                    <button onclick="closeModal()" class="text-[#C2C2C2] hover:text-[#FFFFFF] transition-all">
                         <i class="fas fa-times text-xl"></i>
                     </button>
                 </div>
@@ -1178,8 +1220,6 @@ async function atualizarProduto(id, event) {
         showToast('Produto atualizado com sucesso!', 'success');
         closeModal();
         await loadProducts();
-        if (currentView === 'estoque') renderEstoque();
-        else if (currentView === 'dashboard') updateDashboard();
     } catch (error) {
         showToast('Erro ao atualizar: ' + error.message, 'error');
     }
@@ -1198,8 +1238,6 @@ async function deletarProduto(id) {
         
         showToast('Produto excluído com sucesso!', 'success');
         await loadProducts();
-        if (currentView === 'estoque') renderEstoque();
-        else if (currentView === 'dashboard') updateDashboard();
     } catch (error) {
         showToast('Erro ao deletar: ' + error.message, 'error');
     }
