@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <title>Sistema de Gestão - Churras de Gato</title>
     
     <!-- Tailwind CSS -->
@@ -21,6 +21,7 @@
             font-family: 'Inter', sans-serif;
         }
         
+        /* Toast Animation */
         .toast {
             animation: slideIn 0.3s ease-out;
         }
@@ -36,6 +37,7 @@
             }
         }
         
+        /* Expired Badge Animation */
         .expired-badge {
             animation: pulse 2s infinite;
         }
@@ -49,6 +51,7 @@
             }
         }
         
+        /* Modal Animation */
         .modal {
             animation: fadeIn 0.3s ease-out;
         }
@@ -64,6 +67,7 @@
             }
         }
         
+        /* Badge Styles */
         .unit-badge {
             background-color: #7F3E11;
             color: #FFFFFF;
@@ -72,6 +76,7 @@
             font-size: 11px;
             font-weight: 600;
             margin-left: 8px;
+            white-space: nowrap;
         }
         
         .kilo-badge {
@@ -82,13 +87,16 @@
             font-size: 11px;
             font-weight: 600;
             margin-left: 8px;
+            white-space: nowrap;
         }
         
+        /* Search Highlight */
         .search-highlight {
             background-color: rgba(211, 107, 26, 0.3);
             font-weight: bold;
         }
         
+        /* Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
@@ -106,54 +114,114 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #D36B1A;
         }
+        
+        /* Mobile Menu Styles */
+        .mobile-menu-open {
+            overflow: hidden;
+        }
+        
+        /* Table Responsive Styles */
+        @media (max-width: 768px) {
+            .table-container {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            .table-card {
+                min-width: 600px;
+            }
+        }
+        
+        /* Chart Responsive */
+        canvas {
+            max-height: 300px;
+            width: 100% !important;
+        }
+        
+        /* Responsive Text */
+        @media (max-width: 640px) {
+            .responsive-text {
+                font-size: 0.875rem;
+            }
+        }
+        
+        /* Print Styles */
+        @media print {
+            .no-print {
+                display: none;
+            }
+            .sidebar {
+                display: none;
+            }
+            .main-content {
+                margin-left: 0;
+            }
+        }
     </style>
 </head>
 <body class="bg-[#0A0A0A]">
+    <!-- Mobile Menu Button -->
+    <button id="mobileMenuBtn" class="lg:hidden fixed top-4 left-4 z-50 bg-[#D36B1A] text-white p-3 rounded-lg shadow-lg no-print">
+        <i class="fas fa-bars text-xl"></i>
+    </button>
+    
+    <!-- Overlay para mobile -->
+    <div id="mobileOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden lg:hidden no-print" onclick="closeMobileMenu()"></div>
+    
     <!-- Sidebar -->
-    <div class="flex h-screen">
-        <div class="w-64 bg-[#161616] border-r border-[#7F3E11]">
-            <div class="p-6">
-                <h1 class="text-2xl font-bold text-[#D36B1A]">
-                    <i class="fas fa-drumstick-bite mr-2"></i>
-                    Churras de Gato
-                </h1>
-                <p class="text-[#C2C2C2] text-sm mt-2">Sistema de Gestão</p>
+    <div id="sidebar" class="fixed lg:relative z-50 w-64 bg-[#161616] border-r border-[#7F3E11] h-full transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out overflow-y-auto no-print">
+        <div class="p-6">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-2xl font-bold text-[#D36B1A]">
+                        <i class="fas fa-drumstick-bite mr-2"></i>
+                        Churras de Gato
+                    </h1>
+                    <p class="text-[#C2C2C2] text-sm mt-2">Sistema de Gestão</p>
+                </div>
+                <button id="closeMobileMenu" class="lg:hidden text-[#C2C2C2] hover:text-[#FFFFFF]">
+                    <i class="fas fa-times text-2xl"></i>
+                </button>
             </div>
-            
-            <nav class="mt-8">
-                <a href="#" onclick="showDashboard()" class="nav-item active flex items-center px-6 py-3 text-[#C2C2C2] hover:bg-[#7F3E11] hover:text-[#FFFFFF] transition-all">
-                    <i class="fas fa-chart-line w-5 mr-3"></i>
-                    <span>Dashboard</span>
-                </a>
-                <a href="#" onclick="showEstoque()" class="nav-item flex items-center px-6 py-3 text-[#C2C2C2] hover:bg-[#7F3E11] hover:text-[#FFFFFF] transition-all">
-                    <i class="fas fa-boxes w-5 mr-3"></i>
-                    <span>Gerenciar Estoque</span>
-                </a>
-            </nav>
         </div>
         
-        <!-- Main Content -->
-        <div class="flex-1 overflow-auto">
-            <!-- Header -->
-            <div class="bg-[#161616] border-b border-[#7F3E11] px-8 py-4">
-                <div class="flex justify-between items-center">
-                    <h2 class="text-xl font-semibold text-[#FFFFFF]" id="pageTitle">Dashboard</h2>
-                    <div class="text-[#C2C2C2]">
-                        <i class="fas fa-user-circle text-2xl"></i>
-                        <span class="ml-2">Administrador</span>
-                    </div>
+        <nav class="mt-8">
+            <a href="#" onclick="showDashboard(); return false;" class="nav-item active flex items-center px-6 py-3 text-[#C2C2C2] hover:bg-[#7F3E11] hover:text-[#FFFFFF] transition-all">
+                <i class="fas fa-chart-line w-5 mr-3"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="#" onclick="showEstoque(); return false;" class="nav-item flex items-center px-6 py-3 text-[#C2C2C2] hover:bg-[#7F3E11] hover:text-[#FFFFFF] transition-all">
+                <i class="fas fa-boxes w-5 mr-3"></i>
+                <span>Gerenciar Estoque</span>
+            </a>
+            <a href="#" onclick="showRetiradas(); return false;" class="nav-item flex items-center px-6 py-3 text-[#C2C2C2] hover:bg-[#7F3E11] hover:text-[#FFFFFF] transition-all">
+                <i class="fas fa-clipboard-list w-5 mr-3"></i>
+                <span>Registro de Retiradas</span>
+            </a>
+        </nav>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="lg:ml-64 min-h-screen">
+        <!-- Header -->
+        <div class="bg-[#161616] border-b border-[#7F3E11] px-4 sm:px-8 py-4 sticky top-0 z-30 no-print">
+            <div class="flex justify-between items-center">
+                <h2 class="text-lg sm:text-xl font-semibold text-[#FFFFFF]" id="pageTitle">Dashboard</h2>
+                <div class="text-[#C2C2C2] flex items-center">
+                    <i class="fas fa-user-circle text-2xl"></i>
+                    <span class="ml-2 hidden sm:inline">Administrador</span>
                 </div>
             </div>
-            
-            <!-- Content Area -->
-            <div id="contentArea" class="p-8">
-                <!-- Dynamic content will be loaded here -->
-            </div>
+        </div>
+        
+        <!-- Content Area -->
+        <div id="contentArea" class="p-4 sm:p-6 lg:p-8">
+            <!-- Dynamic content will be loaded here -->
         </div>
     </div>
     
     <!-- Toast Container -->
-    <div id="toastContainer" class="fixed top-5 right-5 z-50 space-y-3"></div>
+    <div id="toastContainer" class="fixed top-20 right-4 sm:right-5 z-50 space-y-3"></div>
     
     <!-- Modal Container -->
     <div id="modalContainer"></div>
