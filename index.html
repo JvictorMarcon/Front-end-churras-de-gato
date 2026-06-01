@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestão - Churras de Gato</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .toast {
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .expired-badge {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
+        }
+        
+        .modal {
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        .unit-badge {
+            background-color: #7F3E11;
+            color: #FFFFFF;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        
+        .kilo-badge {
+            background-color: #D36B1A;
+            color: #FFFFFF;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        
+        .search-highlight {
+            background-color: rgba(211, 107, 26, 0.3);
+            font-weight: bold;
+        }
+        
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #0A0A0A;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #7F3E11;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #D36B1A;
+        }
+    </style>
+</head>
+<body class="bg-[#0A0A0A]">
+    <!-- Sidebar -->
+    <div class="flex h-screen">
+        <div class="w-64 bg-[#161616] border-r border-[#7F3E11]">
+            <div class="p-6">
+                <h1 class="text-2xl font-bold text-[#D36B1A]">
+                    <i class="fas fa-drumstick-bite mr-2"></i>
+                    Churras de Gato
+                </h1>
+                <p class="text-[#C2C2C2] text-sm mt-2">Sistema de Gestão</p>
+            </div>
+            
+            <nav class="mt-8">
+                <a href="#" onclick="showDashboard()" class="nav-item active flex items-center px-6 py-3 text-[#C2C2C2] hover:bg-[#7F3E11] hover:text-[#FFFFFF] transition-all">
+                    <i class="fas fa-chart-line w-5 mr-3"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" onclick="showEstoque()" class="nav-item flex items-center px-6 py-3 text-[#C2C2C2] hover:bg-[#7F3E11] hover:text-[#FFFFFF] transition-all">
+                    <i class="fas fa-boxes w-5 mr-3"></i>
+                    <span>Gerenciar Estoque</span>
+                </a>
+            </nav>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="flex-1 overflow-auto">
+            <!-- Header -->
+            <div class="bg-[#161616] border-b border-[#7F3E11] px-8 py-4">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-xl font-semibold text-[#FFFFFF]" id="pageTitle">Dashboard</h2>
+                    <div class="text-[#C2C2C2]">
+                        <i class="fas fa-user-circle text-2xl"></i>
+                        <span class="ml-2">Administrador</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Content Area -->
+            <div id="contentArea" class="p-8">
+                <!-- Dynamic content will be loaded here -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toast Container -->
+    <div id="toastContainer" class="fixed top-5 right-5 z-50 space-y-3"></div>
+    
+    <!-- Modal Container -->
+    <div id="modalContainer"></div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
