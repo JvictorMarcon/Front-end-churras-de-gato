@@ -19,66 +19,54 @@ document.addEventListener('DOMContentLoaded', () => {
     loadRetiradas();
     setupMobileMenu();
     setupResponsiveCharts();
-    adjustLayoutForScreen();
     
     // Adicionar listener para redimensionamento
     window.addEventListener('resize', () => {
         setupResponsiveCharts();
-        adjustLayoutForScreen();
         if (currentView === 'dashboard') {
             updateDashboard();
         } else if (currentView === 'estoque') {
             renderEstoque();
+        } else if (currentView === 'retiradas') {
+            renderRetiradas();
         }
     });
 });
 
-// Adjust layout based on screen size
-function adjustLayoutForScreen() {
-    const mainContent = document.getElementById('mainContent');
-    const sidebar = document.getElementById('sidebar');
-    
-    if (window.innerWidth >= 1024) {
-        // Em telas grandes, sidebar sempre visível
-        if (sidebar) sidebar.classList.remove('-translate-x-full');
-        if (mainContent) mainContent.classList.remove('ml-0');
-    } else {
-        // Em mobile, sidebar escondida por padrão
-        if (sidebar && !sidebar.classList.contains('-translate-x-full')) {
-            sidebar.classList.add('-translate-x-full');
-        }
-    }
-}
-
 // Setup Mobile Menu
 function setupMobileMenu() {
     const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-    const closeMenuBtn = document.getElementById('closeMobileMenu');
+    const closeMenuBtn = document.getElementById('closeMobileMenuBtn');
     const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('mobileOverlay');
-    const mainContent = document.getElementById('mainContent');
+    const overlay = document.getElementById('sidebarOverlay');
     
-    if (mobileMenuBtn) {
-        mobileMenuBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (sidebar) {
-                sidebar.classList.remove('-translate-x-full');
-                if (overlay) overlay.classList.remove('hidden');
-                document.body.classList.add('mobile-menu-open');
-            }
-        });
-    }
+    const openMenu = () => {
+        if (sidebar) {
+            sidebar.classList.remove('-translate-x-full');
+            if (overlay) overlay.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+    };
     
     const closeMenu = () => {
         if (sidebar && window.innerWidth < 1024) {
             sidebar.classList.add('-translate-x-full');
         }
         if (overlay) overlay.classList.add('hidden');
-        document.body.classList.remove('mobile-menu-open');
+        document.body.style.overflow = '';
     };
     
-    if (closeMenuBtn) closeMenuBtn.addEventListener('click', closeMenu);
-    if (overlay) overlay.addEventListener('click', closeMenu);
+    if (mobileMenuBtn) {
+        mobileMenuBtn.addEventListener('click', openMenu);
+    }
+    
+    if (closeMenuBtn) {
+        closeMenuBtn.addEventListener('click', closeMenu);
+    }
+    
+    if (overlay) {
+        overlay.addEventListener('click', closeMenu);
+    }
     
     // Fechar menu ao clicar em um link (mobile)
     const navLinks = document.querySelectorAll('.nav-item');
@@ -271,52 +259,52 @@ function updateDashboard() {
     
     const content = `
         <!-- Stats Cards -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
-            <div class="bg-[#161616] rounded-lg p-4 sm:p-6 border border-[#7F3E11] hover:border-[#D36B1A] transition-all">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
+            <div class="bg-[#161616] rounded-lg p-3 sm:p-4 lg:p-6 border border-[#7F3E11] hover:border-[#D36B1A] transition-all">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-[#C2C2C2] text-xs sm:text-sm">Total de Produtos</p>
-                        <p class="text-2xl sm:text-3xl font-bold text-[#FFFFFF] mt-2">${stats.total}</p>
+                        <p class="text-xl sm:text-2xl lg:text-3xl font-bold text-[#FFFFFF] mt-1 sm:mt-2">${stats.total}</p>
                     </div>
-                    <i class="fas fa-boxes text-3xl sm:text-4xl text-[#D36B1A]"></i>
+                    <i class="fas fa-boxes text-2xl sm:text-3xl lg:text-4xl text-[#D36B1A]"></i>
                 </div>
             </div>
             
-            <div class="bg-[#161616] rounded-lg p-4 sm:p-6 border border-[#7F3E11] hover:border-[#D36B1A] transition-all">
+            <div class="bg-[#161616] rounded-lg p-3 sm:p-4 lg:p-6 border border-[#7F3E11] hover:border-[#D36B1A] transition-all">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-[#C2C2C2] text-xs sm:text-sm">Produtos Ativos</p>
-                        <p class="text-2xl sm:text-3xl font-bold text-green-500 mt-2">${stats.active}</p>
+                        <p class="text-xl sm:text-2xl lg:text-3xl font-bold text-green-500 mt-1 sm:mt-2">${stats.active}</p>
                     </div>
-                    <i class="fas fa-check-circle text-3xl sm:text-4xl text-green-500"></i>
+                    <i class="fas fa-check-circle text-2xl sm:text-3xl lg:text-4xl text-green-500"></i>
                 </div>
             </div>
             
-            <div class="bg-[#161616] rounded-lg p-4 sm:p-6 border border-[#7F3E11] hover:border-[#D36B1A] transition-all">
+            <div class="bg-[#161616] rounded-lg p-3 sm:p-4 lg:p-6 border border-[#7F3E11] hover:border-[#D36B1A] transition-all">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-[#C2C2C2] text-xs sm:text-sm">Produtos Vencidos</p>
-                        <p class="text-2xl sm:text-3xl font-bold text-[#A62424] mt-2">${stats.expired}</p>
+                        <p class="text-xl sm:text-2xl lg:text-3xl font-bold text-[#A62424] mt-1 sm:mt-2">${stats.expired}</p>
                     </div>
-                    <i class="fas fa-exclamation-triangle text-3xl sm:text-4xl text-[#A62424]"></i>
+                    <i class="fas fa-exclamation-triangle text-2xl sm:text-3xl lg:text-4xl text-[#A62424]"></i>
                 </div>
             </div>
             
-            <div class="bg-[#161616] rounded-lg p-4 sm:p-6 border border-[#7F3E11] hover:border-[#D36B1A] transition-all">
+            <div class="bg-[#161616] rounded-lg p-3 sm:p-4 lg:p-6 border border-[#7F3E11] hover:border-[#D36B1A] transition-all">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-[#C2C2C2] text-xs sm:text-sm">Total de Retiradas</p>
-                        <p class="text-2xl sm:text-3xl font-bold text-[#D36B1A] mt-2">${retiradas.length}</p>
+                        <p class="text-xl sm:text-2xl lg:text-3xl font-bold text-[#D36B1A] mt-1 sm:mt-2">${retiradas.length}</p>
                     </div>
-                    <i class="fas fa-clipboard-list text-3xl sm:text-4xl text-[#D36B1A]"></i>
+                    <i class="fas fa-clipboard-list text-2xl sm:text-3xl lg:text-4xl text-[#D36B1A]"></i>
                 </div>
             </div>
         </div>
         
         <!-- Charts - Layout lado a lado em telas grandes -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 mb-6 sm:mb-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 mb-6 sm:mb-8">
             <div class="bg-[#161616] rounded-lg p-4 sm:p-6 border border-[#7F3E11]">
-                <h3 class="text-base sm:text-lg font-semibold text-[#FFFFFF] mb-4">
+                <h3 class="text-sm sm:text-base lg:text-lg font-semibold text-[#FFFFFF] mb-4">
                     <i class="fas fa-chart-bar mr-2 text-[#D36B1A]"></i>
                     Produtos com Maior Quantidade
                 </h3>
@@ -326,7 +314,7 @@ function updateDashboard() {
             </div>
             
             <div class="bg-[#161616] rounded-lg p-4 sm:p-6 border border-[#7F3E11]">
-                <h3 class="text-base sm:text-lg font-semibold text-[#FFFFFF] mb-4">
+                <h3 class="text-sm sm:text-base lg:text-lg font-semibold text-[#FFFFFF] mb-4">
                     <i class="fas fa-chart-pie mr-2 text-[#D36B1A]"></i>
                     Status dos Produtos
                 </h3>
@@ -337,9 +325,9 @@ function updateDashboard() {
         </div>
         
         <!-- Segunda linha de charts - lado a lado -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
             <div class="bg-[#161616] rounded-lg p-4 sm:p-6 border border-[#7F3E11]">
-                <h3 class="text-base sm:text-lg font-semibold text-[#FFFFFF] mb-4">
+                <h3 class="text-sm sm:text-base lg:text-lg font-semibold text-[#FFFFFF] mb-4">
                     <i class="fas fa-chart-line mr-2 text-[#D36B1A]"></i>
                     Produtos por Categoria
                 </h3>
@@ -349,27 +337,27 @@ function updateDashboard() {
             </div>
             
             <div class="bg-[#161616] rounded-lg p-4 sm:p-6 border border-[#7F3E11]">
-                <h3 class="text-base sm:text-lg font-semibold text-[#FFFFFF] mb-4">
+                <h3 class="text-sm sm:text-base lg:text-lg font-semibold text-[#FFFFFF] mb-4">
                     <i class="fas fa-history mr-2 text-[#D36B1A]"></i>
                     Últimas Retiradas
                 </h3>
-                <div class="space-y-3 max-h-80 overflow-y-auto custom-scrollbar">
+                <div class="space-y-2 sm:space-y-3 max-h-80 overflow-y-auto custom-scrollbar">
                     ${ultimasRetiradas.length === 0 ? `
                         <p class="text-[#C2C2C2] text-center py-8">Nenhuma retirada registrada ainda</p>
                     ` : ultimasRetiradas.map(ret => `
                         <div class="bg-[#0A0A0A] rounded-lg p-3 border border-[#7F3E11] hover:border-[#D36B1A] transition-all">
-                            <div class="flex justify-between items-start">
-                                <div class="flex-1">
-                                    <p class="text-[#FFFFFF] font-semibold">${ret.produto}</p>
-                                    <p class="text-[#C2C2C2] text-sm mt-1">
+                            <div class="flex justify-between items-start gap-2">
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-[#FFFFFF] font-semibold text-sm sm:text-base truncate">${ret.produto}</p>
+                                    <p class="text-[#C2C2C2] text-xs sm:text-sm mt-1">
                                         <i class="fas fa-user mr-1"></i> ${ret.responsavel}
                                     </p>
                                     <p class="text-[#C2C2C2] text-xs mt-1">
                                         <i class="fas fa-calendar mr-1"></i> ${new Date(ret.data).toLocaleString('pt-BR')}
                                     </p>
                                 </div>
-                                <div class="text-right">
-                                    <p class="text-[#D36B1A] font-bold">-${ret.quantidade} ${ret.unidade}</p>
+                                <div class="text-right flex-shrink-0">
+                                    <p class="text-[#D36B1A] font-bold text-sm sm:text-base">-${ret.quantidade} ${ret.unidade}</p>
                                 </div>
                             </div>
                         </div>
@@ -578,7 +566,7 @@ async function showRetiradas() {
 // Render Retiradas Page
 function renderRetiradas() {
     const content = `
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
             <!-- Formulário de Retirada -->
             <div class="bg-[#161616] rounded-lg p-4 sm:p-6 border border-[#7F3E11]">
                 <h3 class="text-base sm:text-lg font-semibold text-[#FFFFFF] mb-4">
@@ -590,7 +578,7 @@ function renderRetiradas() {
                     <div class="space-y-4">
                         <div>
                             <label class="block text-[#C2C2C2] mb-2 text-sm sm:text-base">Produto *</label>
-                            <select id="produtoRetirada" required class="w-full px-4 py-2 bg-[#0A0A0A] border border-[#7F3E11] rounded-lg text-[#FFFFFF] focus:outline-none focus:border-[#D36B1A] text-sm sm:text-base">
+                            <select id="produtoRetirada" required class="w-full px-3 sm:px-4 py-2 bg-[#0A0A0A] border border-[#7F3E11] rounded-lg text-[#FFFFFF] focus:outline-none focus:border-[#D36B1A] text-sm sm:text-base">
                                 <option value="">Selecione um produto...</option>
                                 ${products.filter(p => !isExpired(p.validade)).map(product => `
                                     <option value="${product.id}" data-quantidade="${product.quantidade}" data-categoria="${product.categoria}" data-nome="${product.produto}">
@@ -602,23 +590,23 @@ function renderRetiradas() {
                         
                         <div>
                             <label class="block text-[#C2C2C2] mb-2 text-sm sm:text-base">Quantidade a Retirar *</label>
-                            <input type="number" id="quantidadeRetirada" required step="any" class="w-full px-4 py-2 bg-[#0A0A0A] border border-[#7F3E11] rounded-lg text-[#FFFFFF] focus:outline-none focus:border-[#D36B1A] text-sm sm:text-base">
+                            <input type="number" id="quantidadeRetirada" required step="any" class="w-full px-3 sm:px-4 py-2 bg-[#0A0A0A] border border-[#7F3E11] rounded-lg text-[#FFFFFF] focus:outline-none focus:border-[#D36B1A] text-sm sm:text-base">
                             <p id="quantidadeDisponivel" class="text-xs text-[#C2C2C2] mt-1"></p>
                         </div>
                         
                         <div>
                             <label class="block text-[#C2C2C2] mb-2 text-sm sm:text-base">Responsável pela Retirada *</label>
-                            <input type="text" id="responsavel" required class="w-full px-4 py-2 bg-[#0A0A0A] border border-[#7F3E11] rounded-lg text-[#FFFFFF] focus:outline-none focus:border-[#D36B1A] text-sm sm:text-base" placeholder="Nome do responsável">
+                            <input type="text" id="responsavel" required class="w-full px-3 sm:px-4 py-2 bg-[#0A0A0A] border border-[#7F3E11] rounded-lg text-[#FFFFFF] focus:outline-none focus:border-[#D36B1A] text-sm sm:text-base" placeholder="Nome do responsável">
                         </div>
                         
                         <div>
                             <label class="block text-[#C2C2C2] mb-2 text-sm sm:text-base">Observação (Opcional)</label>
-                            <textarea id="observacao" rows="3" class="w-full px-4 py-2 bg-[#0A0A0A] border border-[#7F3E11] rounded-lg text-[#FFFFFF] focus:outline-none focus:border-[#D36B1A] text-sm sm:text-base" placeholder="Motivo da retirada, destino, etc..."></textarea>
+                            <textarea id="observacao" rows="3" class="w-full px-3 sm:px-4 py-2 bg-[#0A0A0A] border border-[#7F3E11] rounded-lg text-[#FFFFFF] focus:outline-none focus:border-[#D36B1A] text-sm sm:text-base" placeholder="Motivo da retirada, destino, etc..."></textarea>
                         </div>
                     </div>
                     
                     <div class="mt-6">
-                        <button type="submit" class="w-full bg-[#D36B1A] hover:bg-[#7F3E11] text-white font-semibold py-3 px-4 rounded-lg transition-all">
+                        <button type="submit" class="w-full bg-[#D36B1A] hover:bg-[#7F3E11] text-white font-semibold py-2 sm:py-3 px-4 rounded-lg transition-all text-sm sm:text-base">
                             <i class="fas fa-check-circle mr-2"></i>
                             Registrar Retirada
                         </button>
@@ -639,18 +627,18 @@ function renderRetiradas() {
                     ` : retiradas.map(ret => `
                         <div class="bg-[#0A0A0A] rounded-lg p-3 sm:p-4 border border-[#7F3E11] hover:border-[#D36B1A] transition-all">
                             <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
-                                <div class="flex-1">
+                                <div class="flex-1 min-w-0">
                                     <div class="flex items-center gap-2 flex-wrap">
-                                        <p class="text-[#FFFFFF] font-semibold">${ret.produto}</p>
+                                        <p class="text-[#FFFFFF] font-semibold text-sm sm:text-base truncate">${ret.produto}</p>
                                         <span class="text-xs ${ret.unidade === 'kg' ? 'bg-[#D36B1A]' : 'bg-[#7F3E11]'} text-white px-2 py-1 rounded-full">
                                             ${ret.unidade === 'kg' ? 'KG' : 'UN'}
                                         </span>
                                     </div>
-                                    <p class="text-[#C2C2C2] text-sm mt-1">
+                                    <p class="text-[#C2C2C2] text-xs sm:text-sm mt-1">
                                         <i class="fas fa-user mr-1"></i> Responsável: ${ret.responsavel}
                                     </p>
                                     ${ret.observacao ? `
-                                        <p class="text-[#C2C2C2] text-xs mt-1">
+                                        <p class="text-[#C2C2C2] text-xs mt-1 break-words">
                                             <i class="fas fa-comment mr-1"></i> ${ret.observacao}
                                         </p>
                                     ` : ''}
@@ -658,8 +646,8 @@ function renderRetiradas() {
                                         <i class="fas fa-calendar mr-1"></i> ${new Date(ret.data).toLocaleString('pt-BR')}
                                     </p>
                                 </div>
-                                <div class="text-left sm:text-right">
-                                    <p class="text-[#D36B1A] font-bold text-lg">-${ret.quantidade} ${ret.unidade}</p>
+                                <div class="text-left sm:text-right flex-shrink-0">
+                                    <p class="text-[#D36B1A] font-bold text-base sm:text-lg">-${ret.quantidade} ${ret.unidade}</p>
                                     <p class="text-[#C2C2C2] text-xs">Saldo anterior: ${ret.saldoAnterior} ${ret.unidade}</p>
                                     <p class="text-green-500 text-xs">Novo saldo: ${ret.novoSaldo} ${ret.unidade}</p>
                                 </div>
@@ -812,18 +800,18 @@ function renderEstoque() {
     
     const content = `
         <!-- Stats Bar -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 sm:mb-8">
-            <div class="bg-[#161616] rounded-lg p-4 border border-[#7F3E11]">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
+            <div class="bg-[#161616] rounded-lg p-3 sm:p-4 border border-[#7F3E11]">
                 <p class="text-[#C2C2C2] text-xs sm:text-sm">Total</p>
-                <p class="text-xl sm:text-2xl font-bold text-[#FFFFFF]">${stats.total}</p>
+                <p class="text-lg sm:text-xl lg:text-2xl font-bold text-[#FFFFFF]">${stats.total}</p>
             </div>
-            <div class="bg-[#161616] rounded-lg p-4 border border-[#7F3E11]">
+            <div class="bg-[#161616] rounded-lg p-3 sm:p-4 border border-[#7F3E11]">
                 <p class="text-[#C2C2C2] text-xs sm:text-sm">Ativos</p>
-                <p class="text-xl sm:text-2xl font-bold text-green-500">${stats.active}</p>
+                <p class="text-lg sm:text-xl lg:text-2xl font-bold text-green-500">${stats.active}</p>
             </div>
-            <div class="bg-[#161616] rounded-lg p-4 border border-[#7F3E11]">
+            <div class="bg-[#161616] rounded-lg p-3 sm:p-4 border border-[#7F3E11]">
                 <p class="text-[#C2C2C2] text-xs sm:text-sm">Vencidos</p>
-                <p class="text-xl sm:text-2xl font-bold text-[#A62424]">${stats.expired}</p>
+                <p class="text-lg sm:text-xl lg:text-2xl font-bold text-[#A62424]">${stats.expired}</p>
             </div>
             <div>
                 <button onclick="showCadastroModal()" class="w-full bg-[#D36B1A] hover:bg-[#7F3E11] text-white font-semibold py-2 sm:py-3 px-4 rounded-lg transition-all text-sm sm:text-base">
@@ -834,26 +822,26 @@ function renderEstoque() {
         </div>
         
         <!-- Search Bar -->
-        <div class="bg-[#161616] rounded-lg p-4 border border-[#7F3E11] mb-6 sm:mb-8">
+        <div class="bg-[#161616] rounded-lg p-3 sm:p-4 border border-[#7F3E11] mb-6 sm:mb-8">
             <div class="flex flex-col sm:flex-row gap-3">
                 <div class="flex-1 relative">
-                    <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-[#C2C2C2]"></i>
+                    <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-[#C2C2C2] text-sm"></i>
                     <input 
                         type="text" 
                         id="searchInput" 
                         placeholder="Pesquisar por produto, marca ou categoria..." 
-                        class="w-full pl-10 pr-4 py-2 bg-[#0A0A0A] border border-[#7F3E11] rounded-lg text-[#FFFFFF] focus:outline-none focus:border-[#D36B1A] text-sm sm:text-base"
+                        class="w-full pl-9 sm:pl-10 pr-8 sm:pr-4 py-2 bg-[#0A0A0A] border border-[#7F3E11] rounded-lg text-[#FFFFFF] focus:outline-none focus:border-[#D36B1A] text-sm sm:text-base"
                         oninput="handleSearchInput()"
                         value="${currentSearchTerm}"
                     >
                     ${currentSearchTerm ? `
-                        <button onclick="clearSearch()" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#C2C2C2] hover:text-[#FFFFFF] transition-all">
-                            <i class="fas fa-times"></i>
+                        <button onclick="clearSearch()" class="absolute right-2 sm:right-3 top-1/2 transform -translate-y-1/2 text-[#C2C2C2] hover:text-[#FFFFFF] transition-all">
+                            <i class="fas fa-times text-xs sm:text-sm"></i>
                         </button>
                     ` : ''}
                 </div>
-                <div class="text-[#C2C2C2] py-2 px-4 bg-[#0A0A0A] rounded-lg border border-[#7F3E11] text-center sm:text-left whitespace-nowrap">
-                    <i class="fas fa-filter mr-2"></i>
+                <div class="text-[#C2C2C2] py-2 px-3 sm:px-4 bg-[#0A0A0A] rounded-lg border border-[#7F3E11] text-center sm:text-left whitespace-nowrap text-xs sm:text-sm">
+                    <i class="fas fa-filter mr-1 sm:mr-2"></i>
                     ${searchResultCount} resultado${searchResultCount !== 1 ? 's' : ''}
                 </div>
             </div>
@@ -865,21 +853,21 @@ function renderEstoque() {
                 <table class="w-full min-w-[600px]">
                     <thead class="bg-[#0A0A0A] border-b border-[#7F3E11]">
                         <tr>
-                            <th class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-[#C2C2C2] uppercase tracking-wider">Produto</th>
-                            <th class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-[#C2C2C2] uppercase tracking-wider ${isMobile ? 'hidden sm:table-cell' : ''}">Marca</th>
-                            <th class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-[#C2C2C2] uppercase tracking-wider">Categoria</th>
-                            <th class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-[#C2C2C2] uppercase tracking-wider">Quantidade</th>
-                            <th class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-[#C2C2C2] uppercase tracking-wider ${isMobile ? 'hidden sm:table-cell' : ''}">Validade</th>
-                            <th class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-[#C2C2C2] uppercase tracking-wider">Status</th>
-                            <th class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-[#C2C2C2] uppercase tracking-wider">Ações</th>
+                            <th class="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 text-left text-xs font-medium text-[#C2C2C2] uppercase tracking-wider">Produto</th>
+                            <th class="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 text-left text-xs font-medium text-[#C2C2C2] uppercase tracking-wider ${isMobile ? 'hidden sm:table-cell' : ''}">Marca</th>
+                            <th class="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 text-left text-xs font-medium text-[#C2C2C2] uppercase tracking-wider">Categoria</th>
+                            <th class="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 text-left text-xs font-medium text-[#C2C2C2] uppercase tracking-wider">Quantidade</th>
+                            <th class="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 text-left text-xs font-medium text-[#C2C2C2] uppercase tracking-wider ${isMobile ? 'hidden sm:table-cell' : ''}">Validade</th>
+                            <th class="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 text-left text-xs font-medium text-[#C2C2C2] uppercase tracking-wider">Status</th>
+                            <th class="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 text-left text-xs font-medium text-[#C2C2C2] uppercase tracking-wider">Ações</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-[#7F3E11]">
                         ${filteredProducts.length === 0 ? `
                             <tr>
-                                <td colspan="7" class="px-4 sm:px-6 py-12 text-center text-[#C2C2C2]">
-                                    <i class="fas fa-search text-3xl sm:text-4xl mb-4 block"></i>
-                                    <p class="text-base sm:text-lg">Nenhum produto encontrado</p>
+                                <td colspan="7" class="px-3 sm:px-4 lg:px-6 py-8 sm:py-12 text-center text-[#C2C2C2]">
+                                    <i class="fas fa-search text-2xl sm:text-3xl lg:text-4xl mb-3 sm:mb-4 block"></i>
+                                    <p class="text-sm sm:text-base lg:text-lg">Nenhum produto encontrado</p>
                                     <p class="text-xs sm:text-sm mt-2">Tente outros termos de busca</p>
                                 </td>
                             </tr>
@@ -894,31 +882,31 @@ function renderEstoque() {
                             
                             return `
                             <tr class="hover:bg-[#0A0A0A] transition-all">
-                                <td class="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                                <td class="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4 whitespace-nowrap">
                                     <div class="flex items-center flex-wrap gap-1">
-                                        <span class="text-sm sm:text-base text-[#FFFFFF]">${highlightedProduto}</span>
-                                        <span class="${unitType === 'kg' ? 'kilo-badge' : 'unit-badge'} text-xs">
-                                            <i class="fas ${unitType === 'kg' ? 'fa-weight-hanging' : 'fa-box'} mr-1"></i>
-                                            ${unitType === 'kg' ? 'KG' : 'UN'}
+                                        <span class="text-xs sm:text-sm lg:text-base text-[#FFFFFF]">${highlightedProduto}</span>
+                                        <span class="${unitType === 'kg' ? 'kilo-badge' : 'unit-badge'} text-[10px] sm:text-xs">
+                                            <i class="fas ${unitType === 'kg' ? 'fa-weight-hanging' : 'fa-box'} mr-0 sm:mr-1"></i>
+                                            <span class="hidden sm:inline">${unitType === 'kg' ? 'KG' : 'UN'}</span>
                                         </span>
                                     </div>
                                   </td>
-                                <td class="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-[#C2C2C2] text-sm ${isMobile ? 'hidden sm:table-cell' : ''}">${highlightedMarca}</td>
-                                <td class="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-[#C2C2C2] text-sm">${highlightedCategoria}</td>
-                                <td class="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-[#FFFFFF] font-semibold text-sm sm:text-base">${formattedQuantity} ${unitLabel}</td>
-                                <td class="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-[#C2C2C2] text-sm ${isMobile ? 'hidden sm:table-cell' : ''}">${formatDate(product.validade)}</td>
-                                <td class="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                                <td class="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4 whitespace-nowrap text-[#C2C2C2] text-xs sm:text-sm ${isMobile ? 'hidden sm:table-cell' : ''}">${highlightedMarca}</td>
+                                <td class="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4 whitespace-nowrap text-[#C2C2C2] text-xs sm:text-sm">${highlightedCategoria}</td>
+                                <td class="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4 whitespace-nowrap text-[#FFFFFF] font-semibold text-xs sm:text-sm lg:text-base">${formattedQuantity} ${unitLabel}</td>
+                                <td class="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4 whitespace-nowrap text-[#C2C2C2] text-xs sm:text-sm ${isMobile ? 'hidden sm:table-cell' : ''}">${formatDate(product.validade)}</td>
+                                <td class="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4 whitespace-nowrap">
                                     ${isExpired(product.validade) ? 
-                                        '<span class="expired-badge px-2 py-1 text-xs font-semibold rounded-full bg-[#A62424] text-white whitespace-nowrap"><i class="fas fa-skull mr-1"></i>Vencido</span>' : 
-                                        '<span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-500 text-white whitespace-nowrap"><i class="fas fa-check mr-1"></i>Ativo</span>'
+                                        '<span class="expired-badge px-1.5 sm:px-2 py-0.5 sm:py-1 text-[10px] sm:text-xs font-semibold rounded-full bg-[#A62424] text-white whitespace-nowrap"><i class="fas fa-skull mr-0 sm:mr-1"></i><span class="hidden sm:inline">Vencido</span></span>' : 
+                                        '<span class="px-1.5 sm:px-2 py-0.5 sm:py-1 text-[10px] sm:text-xs font-semibold rounded-full bg-green-500 text-white whitespace-nowrap"><i class="fas fa-check mr-0 sm:mr-1"></i><span class="hidden sm:inline">Ativo</span></span>'
                                     }
                                   </td>
-                                <td class="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                                <td class="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4 whitespace-nowrap">
                                     <button onclick="showEditarModal(${product.id})" class="text-[#D36B1A] hover:text-[#7F3E11] mr-2 sm:mr-3 transition-all">
-                                        <i class="fas fa-edit"></i>
+                                        <i class="fas fa-edit text-sm sm:text-base"></i>
                                     </button>
                                     <button onclick="deletarProduto(${product.id})" class="text-[#A62424] hover:text-red-700 transition-all">
-                                        <i class="fas fa-trash"></i>
+                                        <i class="fas fa-trash text-sm sm:text-base"></i>
                                     </button>
                                   </td>
                              </tr>
@@ -942,9 +930,9 @@ function formatDate(dateString) {
 function showCadastroModal() {
     const modalHTML = `
         <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 modal p-4" onclick="if(event.target === this) closeModal()">
-            <div class="bg-[#161616] rounded-lg p-6 sm:p-8 max-w-md w-full mx-auto border border-[#7F3E11] max-h-[90vh] overflow-y-auto">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-xl sm:text-2xl font-bold text-[#FFFFFF]">
+            <div class="bg-[#161616] rounded-lg p-5 sm:p-6 lg:p-8 max-w-md w-full mx-auto border border-[#7F3E11] max-h-[90vh] overflow-y-auto">
+                <div class="flex justify-between items-center mb-5 sm:mb-6">
+                    <h2 class="text-lg sm:text-xl lg:text-2xl font-bold text-[#FFFFFF]">
                         <i class="fas fa-plus-circle text-[#D36B1A] mr-2"></i>
                         Novo Produto
                     </h2>
@@ -954,20 +942,20 @@ function showCadastroModal() {
                 </div>
                 
                 <form onsubmit="cadastrarProduto(event)">
-                    <div class="space-y-4">
+                    <div class="space-y-3 sm:space-y-4">
                         <div>
-                            <label class="block text-[#C2C2C2] mb-2 text-sm sm:text-base">Produto *</label>
-                            <input type="text" id="produto" required class="w-full px-4 py-2 bg-[#0A0A0A] border border-[#7F3E11] rounded-lg text-[#FFFFFF] focus:outline-none focus:border-[#D36B1A] text-sm sm:text-base">
+                            <label class="block text-[#C2C2C2] mb-1 sm:mb-2 text-sm sm:text-base">Produto *</label>
+                            <input type="text" id="produto" required class="w-full px-3 sm:px-4 py-2 bg-[#0A0A0A] border border-[#7F3E11] rounded-lg text-[#FFFFFF] focus:outline-none focus:border-[#D36B1A] text-sm sm:text-base">
                         </div>
                         
                         <div>
-                            <label class="block text-[#C2C2C2] mb-2 text-sm sm:text-base">Marca *</label>
-                            <input type="text" id="marca" required class="w-full px-4 py-2 bg-[#0A0A0A] border border-[#7F3E11] rounded-lg text-[#FFFFFF] focus:outline-none focus:border-[#D36B1A] text-sm sm:text-base">
+                            <label class="block text-[#C2C2C2] mb-1 sm:mb-2 text-sm sm:text-base">Marca *</label>
+                            <input type="text" id="marca" required class="w-full px-3 sm:px-4 py-2 bg-[#0A0A0A] border border-[#7F3E11] rounded-lg text-[#FFFFFF] focus:outline-none focus:border-[#D36B1A] text-sm sm:text-base">
                         </div>
                         
                         <div>
-                            <label class="block text-[#C2C2C2] mb-2 text-sm sm:text-base">Categoria *</label>
-                            <select id="categoria" required class="w-full px-4 py-2 bg-[#0A0A0A] border border-[#7F3E11] rounded-lg text-[#FFFFFF] focus:outline-none focus:border-[#D36B1A] text-sm sm:text-base" onchange="updateQuantidadeLabel()">
+                            <label class="block text-[#C2C2C2] mb-1 sm:mb-2 text-sm sm:text-base">Categoria *</label>
+                            <select id="categoria" required class="w-full px-3 sm:px-4 py-2 bg-[#0A0A0A] border border-[#7F3E11] rounded-lg text-[#FFFFFF] focus:outline-none focus:border-[#D36B1A] text-sm sm:text-base" onchange="updateQuantidadeLabel()">
                                 <option value="">Selecione...</option>
                                 <option value="Carnes">Carnes (KG)</option>
                                 <option value="Carnes Congeladas">Carnes Congeladas (KG)</option>
@@ -982,22 +970,22 @@ function showCadastroModal() {
                         </div>
                         
                         <div>
-                            <label class="block text-[#C2C2C2] mb-2 text-sm sm:text-base" id="quantidadeLabel">Quantidade *</label>
-                            <input type="number" id="quantidade" required min="0.01" step="any" class="w-full px-4 py-2 bg-[#0A0A0A] border border-[#7F3E11] rounded-lg text-[#FFFFFF] focus:outline-none focus:border-[#D36B1A] text-sm sm:text-base">
+                            <label class="block text-[#C2C2C2] mb-1 sm:mb-2 text-sm sm:text-base" id="quantidadeLabel">Quantidade *</label>
+                            <input type="number" id="quantidade" required min="0.01" step="any" class="w-full px-3 sm:px-4 py-2 bg-[#0A0A0A] border border-[#7F3E11] rounded-lg text-[#FFFFFF] focus:outline-none focus:border-[#D36B1A] text-sm sm:text-base">
                             <p id="quantidadeHelp" class="text-xs text-[#C2C2C2] mt-1"></p>
                         </div>
                         
                         <div>
-                            <label class="block text-[#C2C2C2] mb-2 text-sm sm:text-base">Data de Validade *</label>
-                            <input type="date" id="validade" required class="w-full px-4 py-2 bg-[#0A0A0A] border border-[#7F3E11] rounded-lg text-[#FFFFFF] focus:outline-none focus:border-[#D36B1A] text-sm sm:text-base">
+                            <label class="block text-[#C2C2C2] mb-1 sm:mb-2 text-sm sm:text-base">Data de Validade *</label>
+                            <input type="date" id="validade" required class="w-full px-3 sm:px-4 py-2 bg-[#0A0A0A] border border-[#7F3E11] rounded-lg text-[#FFFFFF] focus:outline-none focus:border-[#D36B1A] text-sm sm:text-base">
                         </div>
                     </div>
                     
-                    <div class="mt-6 flex flex-col sm:flex-row gap-3">
-                        <button type="button" onclick="closeModal()" class="flex-1 px-4 py-2 bg-[#0A0A0A] border border-[#C2C2C2] text-[#C2C2C2] rounded-lg hover:bg-[#7F3E11] hover:text-white transition-all text-sm sm:text-base">
+                    <div class="mt-5 sm:mt-6 flex flex-col sm:flex-row gap-2 sm:gap-3">
+                        <button type="button" onclick="closeModal()" class="flex-1 px-3 sm:px-4 py-2 bg-[#0A0A0A] border border-[#C2C2C2] text-[#C2C2C2] rounded-lg hover:bg-[#7F3E11] hover:text-white transition-all text-sm sm:text-base">
                             Cancelar
                         </button>
-                        <button type="submit" class="flex-1 px-4 py-2 bg-[#D36B1A] text-white rounded-lg hover:bg-[#7F3E11] transition-all text-sm sm:text-base">
+                        <button type="submit" class="flex-1 px-3 sm:px-4 py-2 bg-[#D36B1A] text-white rounded-lg hover:bg-[#7F3E11] transition-all text-sm sm:text-base">
                             Cadastrar
                         </button>
                     </div>
@@ -1110,9 +1098,9 @@ function showEditarModal(id) {
     
     const modalHTML = `
         <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 modal p-4" onclick="if(event.target === this) closeModal()">
-            <div class="bg-[#161616] rounded-lg p-6 sm:p-8 max-w-md w-full mx-auto border border-[#7F3E11] max-h-[90vh] overflow-y-auto">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-xl sm:text-2xl font-bold text-[#FFFFFF]">
+            <div class="bg-[#161616] rounded-lg p-5 sm:p-6 lg:p-8 max-w-md w-full mx-auto border border-[#7F3E11] max-h-[90vh] overflow-y-auto">
+                <div class="flex justify-between items-center mb-5 sm:mb-6">
+                    <h2 class="text-lg sm:text-xl lg:text-2xl font-bold text-[#FFFFFF]">
                         <i class="fas fa-edit text-[#D36B1A] mr-2"></i>
                         Editar Produto
                     </h2>
@@ -1122,20 +1110,20 @@ function showEditarModal(id) {
                 </div>
                 
                 <form onsubmit="atualizarProduto(${id}, event)">
-                    <div class="space-y-4">
+                    <div class="space-y-3 sm:space-y-4">
                         <div>
-                            <label class="block text-[#C2C2C2] mb-2 text-sm sm:text-base">Produto</label>
-                            <input type="text" id="produto" value="${product.produto.replace(/"/g, '&quot;')}" class="w-full px-4 py-2 bg-[#0A0A0A] border border-[#7F3E11] rounded-lg text-[#FFFFFF] focus:outline-none focus:border-[#D36B1A] text-sm sm:text-base">
+                            <label class="block text-[#C2C2C2] mb-1 sm:mb-2 text-sm sm:text-base">Produto</label>
+                            <input type="text" id="produto" value="${product.produto.replace(/"/g, '&quot;')}" class="w-full px-3 sm:px-4 py-2 bg-[#0A0A0A] border border-[#7F3E11] rounded-lg text-[#FFFFFF] focus:outline-none focus:border-[#D36B1A] text-sm sm:text-base">
                         </div>
                         
                         <div>
-                            <label class="block text-[#C2C2C2] mb-2 text-sm sm:text-base">Marca</label>
-                            <input type="text" id="marca" value="${product.marca.replace(/"/g, '&quot;')}" class="w-full px-4 py-2 bg-[#0A0A0A] border border-[#7F3E11] rounded-lg text-[#FFFFFF] focus:outline-none focus:border-[#D36B1A] text-sm sm:text-base">
+                            <label class="block text-[#C2C2C2] mb-1 sm:mb-2 text-sm sm:text-base">Marca</label>
+                            <input type="text" id="marca" value="${product.marca.replace(/"/g, '&quot;')}" class="w-full px-3 sm:px-4 py-2 bg-[#0A0A0A] border border-[#7F3E11] rounded-lg text-[#FFFFFF] focus:outline-none focus:border-[#D36B1A] text-sm sm:text-base">
                         </div>
                         
                         <div>
-                            <label class="block text-[#C2C2C2] mb-2 text-sm sm:text-base">Categoria</label>
-                            <select id="categoria" class="w-full px-4 py-2 bg-[#0A0A0A] border border-[#7F3E11] rounded-lg text-[#FFFFFF] focus:outline-none focus:border-[#D36B1A] text-sm sm:text-base">
+                            <label class="block text-[#C2C2C2] mb-1 sm:mb-2 text-sm sm:text-base">Categoria</label>
+                            <select id="categoria" class="w-full px-3 sm:px-4 py-2 bg-[#0A0A0A] border border-[#7F3E11] rounded-lg text-[#FFFFFF] focus:outline-none focus:border-[#D36B1A] text-sm sm:text-base">
                                 <option value="Carnes" ${product.categoria === 'Carnes' ? 'selected' : ''}>Carnes (KG)</option>
                                 <option value="Carnes Congeladas" ${product.categoria === 'Carnes Congeladas' ? 'selected' : ''}>Carnes Congeladas (KG)</option>
                                 <option value="Aves" ${product.categoria === 'Aves' ? 'selected' : ''}>Aves (KG)</option>
@@ -1149,21 +1137,21 @@ function showEditarModal(id) {
                         </div>
                         
                         <div>
-                            <label class="block text-[#C2C2C2] mb-2 text-sm sm:text-base">Quantidade (${unitType === 'kg' ? 'KG' : 'Unidades'})</label>
-                            <input type="number" id="quantidade" value="${formattedQuantidade}" min="0" step="${unitType === 'kg' ? '0.01' : '1'}" class="w-full px-4 py-2 bg-[#0A0A0A] border border-[#7F3E11] rounded-lg text-[#FFFFFF] focus:outline-none focus:border-[#D36B1A] text-sm sm:text-base">
+                            <label class="block text-[#C2C2C2] mb-1 sm:mb-2 text-sm sm:text-base">Quantidade (${unitType === 'kg' ? 'KG' : 'Unidades'})</label>
+                            <input type="number" id="quantidade" value="${formattedQuantidade}" min="0" step="${unitType === 'kg' ? '0.01' : '1'}" class="w-full px-3 sm:px-4 py-2 bg-[#0A0A0A] border border-[#7F3E11] rounded-lg text-[#FFFFFF] focus:outline-none focus:border-[#D36B1A] text-sm sm:text-base">
                         </div>
                         
                         <div>
-                            <label class="block text-[#C2C2C2] mb-2 text-sm sm:text-base">Data de Validade</label>
-                            <input type="date" id="validade" value="${product.validade}" class="w-full px-4 py-2 bg-[#0A0A0A] border border-[#7F3E11] rounded-lg text-[#FFFFFF] focus:outline-none focus:border-[#D36B1A] text-sm sm:text-base">
+                            <label class="block text-[#C2C2C2] mb-1 sm:mb-2 text-sm sm:text-base">Data de Validade</label>
+                            <input type="date" id="validade" value="${product.validade}" class="w-full px-3 sm:px-4 py-2 bg-[#0A0A0A] border border-[#7F3E11] rounded-lg text-[#FFFFFF] focus:outline-none focus:border-[#D36B1A] text-sm sm:text-base">
                         </div>
                     </div>
                     
-                    <div class="mt-6 flex flex-col sm:flex-row gap-3">
-                        <button type="button" onclick="closeModal()" class="flex-1 px-4 py-2 bg-[#0A0A0A] border border-[#C2C2C2] text-[#C2C2C2] rounded-lg hover:bg-[#7F3E11] hover:text-white transition-all text-sm sm:text-base">
+                    <div class="mt-5 sm:mt-6 flex flex-col sm:flex-row gap-2 sm:gap-3">
+                        <button type="button" onclick="closeModal()" class="flex-1 px-3 sm:px-4 py-2 bg-[#0A0A0A] border border-[#C2C2C2] text-[#C2C2C2] rounded-lg hover:bg-[#7F3E11] hover:text-white transition-all text-sm sm:text-base">
                             Cancelar
                         </button>
-                        <button type="submit" class="flex-1 px-4 py-2 bg-[#D36B1A] text-white rounded-lg hover:bg-[#7F3E11] transition-all text-sm sm:text-base">
+                        <button type="submit" class="flex-1 px-3 sm:px-4 py-2 bg-[#D36B1A] text-white rounded-lg hover:bg-[#7F3E11] transition-all text-sm sm:text-base">
                             Salvar
                         </button>
                     </div>
